@@ -1,0 +1,60 @@
+ 通过Intent直接调用系统相机
+ 　　直接调用系统的相机应用，只需要在Intent对象中传入相应的参数即可，总体来说需要以下三步：
+
+ 　　1. Compose a Camera Intent
+
+ 　　MediaStore.ACTION_IMAGE_CAPTURE 拍照；
+
+ 　　MediaStore.ACTION_VIDEO_CAPTURE录像。
+
+
+
+ 　　2. Start the Camera Intent
+
+ 　　使用startActivityForResult()方法，并传入上面的intent对象。
+
+ 　　之后，系统自带的相机应用就会启动，用户就可以用它来拍照或者录像。
+
+
+
+ 　　3. Receive the Intent Result
+
+  　　用onActivityResult()接收传回的图像，当用户拍完照片或者录像，或者取消后，系统都会调用这个函数。
+
+
+
+ 关于接收图像
+ 　　如果不设置接收图像的部分，拍照完毕后将会返回到原来的activity，相片会自动存储在拍照应用的默认存储位置。
+
+
+
+ 　　为了接收图像，需要做以下几个工作：
+
+ 　　1.指定图像的存储位置，一般图像都是存储在外部存储设备，即SD卡上。
+
+ 　　你可以考虑的标准的位置有以下两个：
+
+ 　　Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+
+ 　　这个方法返回图像和视频的标准共享位置，别的应用也可以访问，如果你的应用被卸载了，这个路径下的文件是会保留的。
+
+ 　　为了区分，你可以在这个路径下为你的应用创建一个子文件夹。
+
+ 　　Context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+
+ 　　这个方法返回的路径是和你的应用相关的一个存储图像和视频的方法。
+
+ 　　如果应用被卸载，这个路径下的东西全都会被删除。
+
+ 　　这个路径没有什么安全性限制，别的应用也可以自由访问里面的文件。
+
+
+
+ 　　2.为了接收intent的结果，需要覆写activity中的 onActivityResult() 方法。
+
+ 　　前面说过，可以不设置相机返回的图像结果的操作，此时在startActivityForResult()中不需要给intent传入额外的数据，这样在onActivityResult()回调时，返回的Intent data不为null，照片存在系统默认的图片存储路径下。
+
+ 　　但是如果想得到这个图像，你必须制定要存储的目标File，并且把它作为URI传给启动的intent，使用MediaStore.EXTRA_OUTPUT作为关键字。
+
+ 　　这样的话，拍摄出来的照片将会存在这个特殊指定的地方，此时没有thumbnail会被返回给activity的回调函数，所以接收到的Intent data为null。
+
